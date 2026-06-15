@@ -10,10 +10,10 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { User, Store, Construction, ShieldCheck, Check, Loader2 } from 'lucide-react';
+import { User, Store, Construction, Check, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-type Role = 'customer' | 'supplier' | 'contractor' | 'admin';
+type Role = 'customer' | 'supplier' | 'contractor';
 
 export default function OnboardingPage() {
   const { user, loading: authLoading } = useUser();
@@ -93,13 +93,6 @@ export default function OnboardingPage() {
       desc: 'أقدم خدمات بناء وترميم متخصصة.',
       icon: Construction,
       color: 'bg-emerald-500/10 text-emerald-600'
-    },
-    { 
-      id: 'admin', 
-      title: 'مسؤول نظام', 
-      desc: 'إدارة المنصة والمستخدمين.',
-      icon: ShieldCheck,
-      color: 'bg-purple-500/10 text-purple-600'
     }
   ];
 
@@ -111,7 +104,7 @@ export default function OnboardingPage() {
           <p className="text-muted-foreground">اختر نوع حسابك لنخصص لك أفضل تجربة ممكنة</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-12">
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
           {roles.map((role) => (
             <motion.div
               key={role.id}
@@ -119,19 +112,19 @@ export default function OnboardingPage() {
               whileTap={{ scale: 0.98 }}
             >
               <Card 
-                className={`cursor-pointer transition-all border-2 ${selectedRole === role.id ? 'border-primary ring-4 ring-primary/10' : 'border-transparent'}`}
+                className={`h-full cursor-pointer transition-all border-2 ${selectedRole === role.id ? 'border-primary ring-4 ring-primary/10' : 'border-transparent'}`}
                 onClick={() => setSelectedRole(role.id as Role)}
               >
-                <CardHeader className="flex flex-row items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${role.color}`}>
-                    <role.icon className="w-6 h-6" />
+                <CardHeader className="flex flex-col items-center gap-4 text-center">
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${role.color}`}>
+                    <role.icon className="w-8 h-8" />
                   </div>
-                  <div className="flex-1">
+                  <div>
                     <CardTitle className="text-lg">{role.title}</CardTitle>
-                    <CardDescription className="text-xs">{role.desc}</CardDescription>
+                    <CardDescription className="text-xs mt-2">{role.desc}</CardDescription>
                   </div>
                   {selectedRole === role.id && (
-                    <div className="bg-primary text-white rounded-full p-1">
+                    <div className="bg-primary text-white rounded-full p-1 absolute top-2 right-2">
                       <Check className="w-4 h-4" />
                     </div>
                   )}
