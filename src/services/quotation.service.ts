@@ -14,7 +14,8 @@ export const QuotationService = {
     supplierName: string
   ) {
     const quotesRef = collection(db, 'rfqs', rfqId, 'quotations');
-    return addDoc(quotesRef, {
+    // Initiate write without awaiting to leverage optimistic UI
+    addDoc(quotesRef, {
       ...data,
       rfqId,
       supplierId,

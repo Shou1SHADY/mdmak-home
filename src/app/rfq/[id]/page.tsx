@@ -1,9 +1,8 @@
 "use client";
 
-import { use, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth, useFirestore, useUser, useDoc, useCollection } from '@/firebase';
-import { doc, collection, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { use, useState } from 'react';
+import { useFirestore, useUser, useDoc, useCollection } from '@/firebase';
+import { doc, collection } from 'firebase/firestore';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/sections/Footer';
 import { useLanguageContext } from '@/components/LanguageProvider';
@@ -14,25 +13,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { 
-  ClipboardList, 
   MapPin, 
   Calendar, 
-  DollarSign, 
-  Clock, 
   Loader2, 
-  Plus, 
   CheckCircle2, 
-  ArrowRight,
-  TrendingUp,
   BarChart3,
   FileText,
-  User
+  User,
+  TrendingUp
 } from 'lucide-react';
 import { RFQ, Quotation } from '@/types/rfq';
 import { useMemoFirebase } from '@/firebase/firestore/use-doc';
+import { QuotationService } from '@/services/quotation.service';
 import Link from 'next/link';
 
 interface PageProps {
@@ -53,7 +47,6 @@ export default function RFQDetailsPage({ params }: PageProps) {
   const quotesRef = useMemoFirebase(() => collection(db, 'rfqs', id, 'quotations'), [db, id]);
   const { data: quotations, loading: quotesLoading } = useCollection<Quotation>(quotesRef);
 
-  // Supplier quote form state
   const [quoteForm, setQuoteForm] = useState({
     price: '',
     deliveryTime: '',
@@ -62,7 +55,7 @@ export default function RFQDetailsPage({ params }: PageProps) {
   const [submittingQuote, setSubmittingQuote] = useState(false);
 
   const isCustomer = user?.uid === rfq?.customerId;
-  const isSupplier = !isCustomer; // Basic check for MVP
+  const isSupplier = user && !isCustomer;
 
   const handleQuoteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,15 +63,17 @@ export default function RFQDetailsPage({ params }: PageProps) {
 
     setSubmittingQuote(true);
     try {
-      await addDoc(collection(db, 'rfqs', id, 'quotations'), {
-        ...quoteForm,
-        price: Number(quoteForm.price),
-        rfqId: id,
-        supplierId: user.uid,
-        supplierName: user.displayName || user.email,
-        status: 'pending',
-        createdAt: serverTimestamp(),
-      });
+      await QuotationService.submitQuotation(
+        db,
+        id,
+        {
+          price: Number(quoteForm.price),
+          deliveryTime: quoteForm.deliveryTime,
+          notes: quoteForm.notes
+        },
+        user.uid,
+        user.displayName || user.email || 'Supplier'
+      );
       
       toast({
         title: isAr ? "تم إرسال العرض" : "Quote Submitted",
@@ -130,7 +125,7 @@ export default function RFQDetailsPage({ params }: PageProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-primary" />
-                  {new Date(rfq.createdAt?.seconds * 1000).toLocaleDateString()}
+                  {rfq.createdAt ? new Date(rfq.createdAt.seconds * 1000).toLocaleDateString() : '...'}
                 </div>
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-primary" />
@@ -193,11 +188,11 @@ export default function RFQDetailsPage({ params }: PageProps) {
                         <CardContent className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
                           <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center font-black text-primary">
-                              {q.supplierName.charAt(0)}
+                              {q.supplierName?.charAt(0)}
                             </div>
                             <div>
                               <h4 className="font-bold text-primary">{q.supplierName}</h4>
-                              <p className="text-xs text-muted-foreground">{isAr ? 'منذ' : 'Posted'} {new Date(q.createdAt?.seconds * 1000).toLocaleDateString()}</p>
+                              <p className="text-xs text-muted-foreground">{isAr ? 'منذ' : 'Posted'} {q.createdAt ? new Date(q.createdAt.seconds * 1000).toLocaleDateString() : '...'}</p>
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-8 text-center md:text-left">
