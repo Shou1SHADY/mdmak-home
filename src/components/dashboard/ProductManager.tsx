@@ -1,10 +1,9 @@
-
 "use client";
 
 import { useState } from 'react';
 import { useUser } from '@/firebase/auth/use-user';
 import { useFirestore } from '@/firebase/provider';
-import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, where } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import { useCollection } from '@/firebase';
 import { useLanguageContext } from '@/components/LanguageProvider';
 import { 
@@ -21,7 +20,6 @@ import {
   DialogDescription, 
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger,
   DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -34,11 +32,12 @@ import { Product, CategorySlug } from '@/types/marketplace';
 import { Edit, Trash2, Plus, Loader2, Package, Search, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useMemoFirebase } from '@/firebase/firestore/use-doc';
+import { ProductService } from '@/services/product.service';
 
 export function ProductManager() {
   const { user } = useUser();
   const db = useFirestore();
-  const { lang, isRtl } = useLanguageContext();
+  const { lang } = useLanguageContext();
   const { toast } = useToast();
   const isAr = lang === 'ar';
 
@@ -47,7 +46,6 @@ export function ProductManager() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Form State
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -101,26 +99,16 @@ export function ProductManager() {
     if (!user) return;
     setLoading(true);
 
-    const productData = {
-      ...formData,
-      price: Number(formData.price),
-      stock: Number(formData.stock),
-      supplierId: user.uid,
-      supplierName: user.displayName || user.email || 'Supplier',
-      rating: editingProduct?.rating || 4.5,
-      reviewsCount: editingProduct?.reviewsCount || 0,
-      updatedAt: serverTimestamp(),
-      createdAt: editingProduct?.createdAt || serverTimestamp(),
-    };
-
     try {
-      if (editingProduct) {
-        await updateDoc(doc(db, 'products', editingProduct.id), productData);
-        toast({ title: isAr ? "تم تحديث المنتج" : "Product Updated" });
-      } else {
-        await addDoc(collection(db, 'products'), productData);
-        toast({ title: isAr ? "تم إضافة المنتج" : "Product Added" });
-      }
+      await ProductService.saveProduct(
+        db,
+        formData,
+        user.uid,
+        user.displayName || user.email || 'Supplier',
+        editingProduct?.id
+      );
+      
+      toast({ title: editingProduct ? (isAr ? "تم تحديث المنتج" : "Product Updated") : (isAr ? "تم إضافة المنتج" : "Product Added") });
       setIsModalOpen(false);
     } catch (error: any) {
       toast({ variant: "destructive", title: "Error", description: error.message });
@@ -132,7 +120,7 @@ export function ProductManager() {
   const handleDelete = async (productId: string) => {
     if (!confirm(isAr ? 'هل أنت متأكد من حذف هذا المنتج؟' : 'Are you sure you want to delete this product?')) return;
     try {
-      await deleteDoc(doc(db, 'products', productId));
+      await ProductService.deleteProduct(db, productId);
       toast({ title: isAr ? "تم حذف المنتج" : "Product Deleted" });
     } catch (error: any) {
       toast({ variant: "destructive", title: "Error", description: error.message });

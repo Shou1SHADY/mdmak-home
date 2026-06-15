@@ -13,19 +13,16 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { 
   Trophy, 
-  Zap, 
   DollarSign, 
   Clock, 
   ShieldCheck, 
   CheckCircle2, 
-  AlertCircle,
   BarChart3,
-  ArrowRight,
   TrendingDown,
   ChevronRight
 } from 'lucide-react';
@@ -40,12 +37,12 @@ import {
   Cell
 } from 'recharts';
 import { SupplierOffer } from '@/types/marketplace';
+import { ProcurementService } from '@/services/procurement.service';
 
 export default function ComparisonPage() {
   const { lang, isRtl } = useLanguageContext();
   const isAr = lang === 'ar';
 
-  // Mock data for demonstration
   const [offers] = useState<SupplierOffer[]>([
     {
       id: '1',
@@ -89,36 +86,18 @@ export default function ComparisonPage() {
     const prices = offers.map(o => o.price);
     const deliveries = offers.map(o => o.deliveryDays);
     const maxPrice = Math.max(...prices);
-    
-    const lowestPrice = Math.min(...prices);
-    const fastestDelivery = Math.min(...deliveries);
 
-    const calculatedOffers = offers.map(o => {
-      // Procurement Score Calculation (Simple Weighting)
-      // Rating: 40%, Price: 40%, Delivery: 20%
-      const priceScore = (maxPrice - o.price) / (maxPrice - lowestPrice || 1) * 100;
-      const deliveryScore = (Math.max(...deliveries) - o.deliveryDays) / (Math.max(...deliveries) - fastestDelivery || 1) * 100;
-      const ratingScore = (o.rating / 5) * 100;
-      
-      const procurementScore = Math.round((ratingScore * 0.4) + (priceScore * 0.4) + (deliveryScore * 0.2));
-      const savings = Math.round(((maxPrice - o.price) / maxPrice) * 100);
-
-      return {
-        ...o,
-        procurementScore,
-        savings
-      };
-    });
-
-    const bestValueId = calculatedOffers.reduce((prev, current) => 
-      (prev.procurementScore > current.procurementScore) ? prev : current
-    ).id;
+    const calculatedOffers = offers.map(o => ({
+      ...o,
+      procurementScore: ProcurementService.calculateScore(o.price, o.rating, o.deliveryDays, prices, deliveries),
+      savings: ProcurementService.calculateSavings(o.price, maxPrice)
+    }));
 
     return {
       offers: calculatedOffers,
-      lowestPrice,
-      fastestDelivery,
-      bestValueId
+      lowestPrice: Math.min(...prices),
+      fastestDelivery: Math.min(...deliveries),
+      bestValueId: ProcurementService.getBestValueId(offers.map(o => ({ ...o, rating: o.rating, deliveryDays: o.deliveryDays })))
     };
   }, [offers]);
 
@@ -127,6 +106,8 @@ export default function ComparisonPage() {
     price: o.price,
     score: o.procurementScore
   }));
+
+  const aiInsights = useMemo(() => ProcurementService.getInsights(metrics.offers, lang), [metrics.offers, lang]);
 
   return (
     <div className="min-h-screen bg-muted/20" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -160,7 +141,6 @@ export default function ComparisonPage() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8 mb-12">
-          {/* Highlight Cards */}
           <Card className="rounded-[2rem] border-0 shadow-sm overflow-hidden bg-emerald-50 text-emerald-900 border-2 border-emerald-100/50">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-start">
@@ -207,7 +187,6 @@ export default function ComparisonPage() {
           </Card>
         </div>
 
-        {/* Comparison Engine Table */}
         <Card className="rounded-[2.5rem] overflow-hidden border-0 shadow-xl mb-12">
           <div className="p-8 border-b bg-white">
             <h3 className="text-xl font-black text-primary">{isAr ? 'تحليل المواصفات التفصيلي' : 'Detailed Specification Analysis'}</h3>
@@ -300,7 +279,6 @@ export default function ComparisonPage() {
           </Table>
         </Card>
 
-        {/* Visual Analytics Section */}
         <div className="grid lg:grid-cols-2 gap-8">
           <Card className="rounded-[2.5rem] border-0 shadow-lg p-8">
             <CardHeader className="p-0 mb-8">
@@ -335,7 +313,7 @@ export default function ComparisonPage() {
               <div className="flex items-center justify-between p-6 bg-white/10 rounded-[2rem] border border-white/5">
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-white/70">{isAr ? 'إجمالي التوفير الممكن' : 'Total Potential Savings'}</p>
-                  <p className="text-3xl font-black text-accent">SAR 140.00</p>
+                  <p className="text-3xl font-black text-accent">SAR {(Math.max(...offers.map(o => o.price)) - metrics.lowestPrice).toLocaleString()}</p>
                 </div>
                 <div className="w-16 h-16 rounded-3xl bg-accent flex items-center justify-center text-primary">
                   <TrendingDown className="w-8 h-8" />
@@ -345,22 +323,12 @@ export default function ComparisonPage() {
               <div className="space-y-6">
                 <h4 className="font-bold text-sm uppercase tracking-widest text-white/60">{isAr ? 'رؤى الذكاء الاصطناعي' : 'AI Procurement Insights'}</h4>
                 <div className="space-y-4">
-                  <div className="flex gap-4 items-start">
-                    <div className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0" />
-                    <p className="text-sm leading-relaxed">
-                      {isAr 
-                        ? 'المورد "MDMAK Supply Co." يقدم أفضل توازن بين السعر والسرعة مع درجة مشتريات ٨٩٪.' 
-                        : '"MDMAK Supply Co." offers the best balance of price and speed with an 89% procurement score.'}
-                    </p>
-                  </div>
-                  <div className="flex gap-4 items-start text-white/80">
-                    <div className="w-2 h-2 rounded-full bg-blue-400 mt-2 shrink-0" />
-                    <p className="text-sm leading-relaxed">
-                      {isAr 
-                        ? 'اختيار "Sahara Construct" قد يوفر ٤ أيام عمل ولكن بتكلفة إضافية بنسبة ١١٪.' 
-                        : 'Choosing "Sahara Construct" could save 4 business days but at an 11% cost premium.'}
-                    </p>
-                  </div>
+                  {aiInsights.map((insight, i) => (
+                    <div key={i} className="flex gap-4 items-start">
+                      <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${i === 0 ? 'bg-accent' : 'bg-blue-400'}`} />
+                      <p className="text-sm leading-relaxed">{insight}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
 

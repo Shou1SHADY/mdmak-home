@@ -1,19 +1,18 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, useFirestore } from '@/firebase/provider';
+import { useFirestore } from '@/firebase/provider';
 import { useUser } from '@/firebase/auth/use-user';
 import { useDoc } from '@/firebase/firestore/use-doc';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { User, Store, Construction, Check, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { AuthService } from '@/services/auth.service';
 
-// Restricted Role type for public onboarding
 type PublicRole = 'customer' | 'supplier' | 'contractor';
 
 export default function OnboardingPage() {
@@ -40,16 +39,13 @@ export default function OnboardingPage() {
     if (!selectedRole || !user) return;
     setSaving(true);
     try {
-      // Create or update user profile. 
-      // Security rules will prevent setting 'admin' role from here.
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName || '',
-        role: selectedRole,
-        onboarded: true,
-        createdAt: serverTimestamp(),
-      }, { merge: true });
+      await AuthService.completeOnboarding(
+        db,
+        user.uid,
+        user.email!,
+        user.displayName || '',
+        selectedRole
+      );
       
       toast({
         title: "تم بنجاح!",
@@ -57,11 +53,7 @@ export default function OnboardingPage() {
       });
       router.push('/');
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "خطأ",
-        description: error.message,
-      });
+      toast({ variant: "destructive", title: "خطأ", description: error.message });
     } finally {
       setSaving(false);
     }
@@ -109,12 +101,7 @@ export default function OnboardingPage() {
 
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           {roles.map((role) => (
-            <motion.div
-              key={role.id}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="relative"
-            >
+            <motion.div key={role.id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="relative">
               <Card 
                 className={`h-full cursor-pointer transition-all border-2 ${selectedRole === role.id ? 'border-primary ring-4 ring-primary/10' : 'border-transparent'}`}
                 onClick={() => setSelectedRole(role.id as PublicRole)}

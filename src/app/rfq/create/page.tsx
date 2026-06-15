@@ -2,22 +2,21 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, useFirestore, useUser } from '@/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useFirestore, useUser } from '@/firebase';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/sections/Footer';
 import { useLanguageContext } from '@/components/LanguageProvider';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { RoleGuard } from '@/components/auth/RoleGuard';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { ClipboardList, ArrowRight, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ClipboardList, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { RFQService } from '@/services/rfq.service';
 
 export default function CreateRFQPage() {
   const { lang, isRtl } = useLanguageContext();
@@ -43,14 +42,12 @@ export default function CreateRFQPage() {
 
     setLoading(true);
     try {
-      const docRef = await addDoc(collection(db, 'rfqs'), {
-        ...formData,
-        budget: Number(formData.budget),
-        customerId: user.uid,
-        customerName: user.displayName || user.email,
-        status: 'open',
-        createdAt: serverTimestamp(),
-      });
+      const docRef = await RFQService.createRFQ(
+        db,
+        formData as any,
+        user.uid,
+        user.displayName || user.email || ''
+      );
       
       toast({
         title: isAr ? "تم إنشاء طلبك بنجاح" : "RFQ Created Successfully",
@@ -58,11 +55,7 @@ export default function CreateRFQPage() {
       });
       router.push(`/rfq/${docRef.id}`);
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message,
-      });
+      toast({ variant: "destructive", title: "Error", description: error.message });
     } finally {
       setLoading(false);
     }
