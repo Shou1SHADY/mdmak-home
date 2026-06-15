@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "UserProfile": {
@@ -40,6 +39,42 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["name", "price", "category", "supplierId"]
+    },
+    "RFQ": {
+      "title": "Request for Quotation",
+      "description": "A formal request from a customer to suppliers for pricing and terms.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "projectName": { "type": "string" },
+        "projectType": { "type": "string" },
+        "location": { "type": "string" },
+        "budget": { "type": "number" },
+        "timeline": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "closed", "completed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["customerId", "projectName", "projectType", "location", "status"]
+    },
+    "Quotation": {
+      "title": "Quotation",
+      "description": "A supplier's response to an RFQ.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "rfqId": { "type": "string" },
+        "supplierId": { "type": "string" },
+        "supplierName": { "type": "string" },
+        "price": { "type": "number" },
+        "deliveryTime": { "type": "string" },
+        "notes": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["rfqId", "supplierId", "price", "deliveryTime", "status"]
     }
   },
   "auth": {
@@ -53,6 +88,14 @@
     "/products/{productId}": {
       "schema": "#/entities/Product",
       "description": "Collection of products available in the marketplace."
+    },
+    "/rfqs/{rfqId}": {
+      "schema": "#/entities/RFQ",
+      "description": "Collection of project RFQs."
+    },
+    "/rfqs/{rfqId}/quotations/{quotationId}": {
+      "schema": "#/entities/Quotation",
+      "description": "Quotations submitted by suppliers for a specific RFQ."
     }
   }
 }
