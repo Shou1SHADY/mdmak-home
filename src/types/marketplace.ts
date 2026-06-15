@@ -14,14 +14,20 @@ export interface Product {
   id: string;
   name: string;
   description: string;
+  longDescription?: string;
   price: number;
   category: CategorySlug;
   supplierId: string;
   supplierName: string;
+  supplierLocation?: string;
+  deliveryScore?: number;
   imageUrl: string;
+  images?: string[];
   rating: number;
+  reviewsCount?: number;
   deliveryEstimate: string;
   stock: number;
+  specifications?: Record<string, string>;
   createdAt?: any;
 }
 
