@@ -18,12 +18,15 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { User, LogOut, Settings, LayoutDashboard } from "lucide-react";
+import { useLanguageContext } from '@/components/LanguageProvider';
 
 export function UserNav() {
   const { user } = useUser();
   const auth = useAuth();
   const db = useFirestore();
   const router = useRouter();
+  const { lang } = useLanguageContext();
+  const isAr = lang === 'ar';
 
   const userDocRef = user ? doc(db, 'users', user.uid) : null;
   const { data: profile } = useDoc(userDocRef);
@@ -47,36 +50,36 @@ export function UserNav() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount dir="rtl">
+      <DropdownMenuContent className="w-56" align="end" forceMount dir={isAr ? 'rtl' : 'ltr'}>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.displayName || profile?.displayName || 'مستخدم'}</p>
+            <p className="text-sm font-medium leading-none">{user.displayName || profile?.displayName || (isAr ? 'مستخدم' : 'User')}</p>
             <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
             <p className="text-[10px] font-bold uppercase tracking-wider text-accent mt-1">
-              {profile?.role === 'customer' ? 'عميل' : 
-               profile?.role === 'supplier' ? 'مورد' : 
-               profile?.role === 'contractor' ? 'مقاول' : 
-               profile?.role === 'admin' ? 'مدير' : ''}
+              {profile?.role === 'customer' ? (isAr ? 'عميل' : 'Customer') : 
+               profile?.role === 'supplier' ? (isAr ? 'مورد' : 'Supplier') : 
+               profile?.role === 'contractor' ? (isAr ? 'مقاول' : 'Contractor') : 
+               profile?.role === 'admin' ? (isAr ? 'مدير' : 'Admin') : ''}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-          <LayoutDashboard className="ml-2 h-4 w-4" />
-          <span>لوحة التحكم</span>
+          <LayoutDashboard className={`${isAr ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+          <span>{isAr ? 'لوحة التحكم' : 'Dashboard'}</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push('/profile')}>
-          <User className="ml-2 h-4 w-4" />
-          <span>الملف الشخصي</span>
+          <User className={`${isAr ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+          <span>{isAr ? 'الملف الشخصي' : 'Profile'}</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push('/settings')}>
-          <Settings className="ml-2 h-4 w-4" />
-          <span>الإعدادات</span>
+          <Settings className={`${isAr ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+          <span>{isAr ? 'الإعدادات' : 'Settings'}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-          <LogOut className="ml-2 h-4 w-4" />
-          <span>تسجيل الخروج</span>
+          <LogOut className={`${isAr ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+          <span>{isAr ? 'تسجيل الخروج' : 'Logout'}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
