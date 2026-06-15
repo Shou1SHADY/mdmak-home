@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "UserProfile": {
@@ -13,6 +14,36 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "email", "role"]
+    },
+    "ContractorProfile": {
+      "title": "Contractor Profile",
+      "description": "Public profile for a construction contractor or professional.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "companyName": { "type": "string" },
+        "logo": { "type": "string" },
+        "description": { "type": "string" },
+        "services": { "type": "array", "items": { "type": "string" } },
+        "rating": { "type": "number" },
+        "reviewsCount": { "type": "number" },
+        "location": { "type": "string" },
+        "city": { "type": "string" },
+        "portfolio": { 
+          "type": "array", 
+          "items": { 
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "imageUrl": { "type": "string" }
+            }
+          }
+        },
+        "certifications": { "type": "array", "items": { "type": "string" } },
+        "verified": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["companyName", "services", "location"]
     },
     "Product": {
       "title": "Product",
@@ -84,6 +115,10 @@
     "/users/{userId}": {
       "schema": "#/entities/UserProfile",
       "description": "User profiles stored by their authentication UID."
+    },
+    "/contractors/{contractorId}": {
+      "schema": "#/entities/ContractorProfile",
+      "description": "Public profiles for contractors and professional service providers."
     },
     "/products/{productId}": {
       "schema": "#/entities/Product",

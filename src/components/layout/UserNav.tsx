@@ -36,6 +36,12 @@ export function UserNav() {
     router.push('/');
   };
 
+  const getDashboardPath = () => {
+    if (profile?.role === 'supplier') return '/dashboard';
+    if (profile?.role === 'contractor') return '/contractor-dashboard';
+    return '/dashboard'; // Default or customer dashboard if implemented
+  };
+
   if (!user) return null;
 
   const initials = user.email?.substring(0, 2).toUpperCase() || 'U';
@@ -64,7 +70,7 @@ export function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push('/dashboard')}>
+        <DropdownMenuItem onClick={() => router.push(getDashboardPath())}>
           <LayoutDashboard className={`${isAr ? 'ml-2' : 'mr-2'} h-4 w-4`} />
           <span>{isAr ? 'لوحة التحكم' : 'Dashboard'}</span>
         </DropdownMenuItem>

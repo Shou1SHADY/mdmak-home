@@ -34,7 +34,7 @@ export function Header() {
           
           <nav className="hidden lg:flex items-center gap-6">
             <Link href="/marketplace" className="text-sm font-bold hover:text-accent transition-colors">{t.nav.products}</Link>
-            <Link href="#" className="text-sm font-medium hover:text-accent transition-colors">{t.nav.contractors}</Link>
+            <Link href="/contractors" className="text-sm font-bold hover:text-accent transition-colors">{t.nav.contractors}</Link>
             <Link href="#" className="text-sm font-medium hover:text-accent transition-colors">{t.nav.howItWorks}</Link>
             <Link href="/#estimator" className="text-sm font-medium hover:text-accent transition-colors">{t.nav.estimator}</Link>
           </nav>
