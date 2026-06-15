@@ -38,6 +38,11 @@ service cloud.firestore {
         );
       }
     }
+
+    match /orders/{orderId} {
+      allow read: if request.auth != null && (resource.data.customerId == request.auth.uid || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+      allow create: if request.auth != null;
+    }
     
     // Default deny
     match /{document=**} {

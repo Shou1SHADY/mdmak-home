@@ -106,6 +106,20 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["rfqId", "supplierId", "price", "deliveryTime", "status"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A customer purchase of materials.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customerId": { "type": "string" },
+        "items": { "type": "array", "items": { "type": "object" } },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "processing", "shipped", "delivered"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["customerId", "totalAmount", "status"]
     }
   },
   "auth": {
@@ -131,6 +145,10 @@
     "/rfqs/{rfqId}/quotations/{quotationId}": {
       "schema": "#/entities/Quotation",
       "description": "Quotations submitted by suppliers for a specific RFQ."
+    },
+    "/orders/{orderId}": {
+      "schema": "#/entities/Order",
+      "description": "Customer purchase orders."
     }
   }
 }

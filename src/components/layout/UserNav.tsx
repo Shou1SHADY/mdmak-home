@@ -39,7 +39,8 @@ export function UserNav() {
   const getDashboardPath = () => {
     if (profile?.role === 'supplier') return '/dashboard';
     if (profile?.role === 'contractor') return '/contractor-dashboard';
-    return '/dashboard'; // Default or customer dashboard if implemented
+    if (profile?.role === 'customer') return '/customer-dashboard';
+    return '/dashboard';
   };
 
   if (!user) return null;
