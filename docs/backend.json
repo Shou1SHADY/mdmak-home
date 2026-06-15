@@ -14,6 +14,26 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["uid", "email", "role"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "A construction material product in the marketplace.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "category": { "type": "string" },
+        "supplierId": { "type": "string" },
+        "supplierName": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "rating": { "type": "number" },
+        "deliveryEstimate": { "type": "string" },
+        "stock": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "price", "category", "supplierId"]
     }
   },
   "auth": {
@@ -23,6 +43,10 @@
     "/users/{userId}": {
       "schema": "#/entities/UserProfile",
       "description": "User profiles stored by their authentication UID."
+    },
+    "/products/{productId}": {
+      "schema": "#/entities/Product",
+      "description": "Collection of products available in the marketplace."
     }
   }
 }

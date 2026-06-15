@@ -4,7 +4,7 @@
 import { useLanguageContext } from '@/components/LanguageProvider';
 import { translations } from '@/lib/translations';
 import { Button } from '@/components/ui/button';
-import { Globe, Menu } from 'lucide-react';
+import { Globe, Menu, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { UserNav } from './UserNav';
 import { useUser } from '@/firebase/auth/use-user';
@@ -26,17 +26,17 @@ export function Header() {
               className="text-2xl font-extrabold tracking-tight text-primary flex items-center gap-2"
             >
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground text-xs">MH</span>
+                <span className="text-primary-foreground text-xs font-black">M</span>
               </div>
-              <span>MDMAK HOME</span>
+              <span className="hidden sm:inline">MDMAK HOME</span>
             </motion.div>
           </Link>
           
           <nav className="hidden lg:flex items-center gap-6">
-            <Link href="#" className="text-sm font-medium hover:text-accent transition-colors">{t.nav.products}</Link>
+            <Link href="/marketplace" className="text-sm font-bold hover:text-accent transition-colors">{t.nav.products}</Link>
             <Link href="#" className="text-sm font-medium hover:text-accent transition-colors">{t.nav.contractors}</Link>
             <Link href="#" className="text-sm font-medium hover:text-accent transition-colors">{t.nav.howItWorks}</Link>
-            <Link href="#estimator" className="text-sm font-medium hover:text-accent transition-colors">{t.nav.estimator}</Link>
+            <Link href="/#estimator" className="text-sm font-medium hover:text-accent transition-colors">{t.nav.estimator}</Link>
           </nav>
         </div>
 
@@ -44,6 +44,13 @@ export function Header() {
           <Button variant="ghost" size="sm" onClick={toggleLanguage} className="flex items-center gap-2">
             <Globe className="w-4 h-4" />
             <span className="text-xs font-bold uppercase">{lang === 'ar' ? 'English' : 'العربية'}</span>
+          </Button>
+
+          <Button variant="ghost" size="icon" className="relative" asChild>
+            <Link href="/cart">
+              <ShoppingBag className="w-5 h-5" />
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-accent text-primary text-[10px] font-black rounded-full flex items-center justify-center">0</span>
+            </Link>
           </Button>
           
           {!loading && user ? (

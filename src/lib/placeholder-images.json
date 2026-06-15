@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "cement-bag",
+      "description": "Premium Portland Cement Bag",
+      "imageUrl": "https://picsum.photos/seed/cement/600/400",
+      "imageHint": "cement bag"
+    },
+    {
+      "id": "steel-rebar",
+      "description": "Reinforcement Steel Rebars",
+      "imageUrl": "https://picsum.photos/seed/steel/600/400",
+      "imageHint": "steel rebar"
+    },
+    {
+      "id": "ceramic-tiles",
+      "description": "Modern Ceramic Floor Tiles",
+      "imageUrl": "https://picsum.photos/seed/tiles/600/400",
+      "imageHint": "ceramic tiles"
+    },
+    {
+      "id": "paint-buckets",
+      "description": "Interior Wall Paint Buckets",
+      "imageUrl": "https://picsum.photos/seed/paint/600/400",
+      "imageHint": "paint bucket"
+    },
+    {
+      "id": "plumbing-pipes",
+      "description": "PVC Plumbing Pipes and Fittings",
+      "imageUrl": "https://picsum.photos/seed/pipes/600/400",
+      "imageHint": "plumbing pipes"
+    },
+    {
+      "id": "electrical-wiring",
+      "description": "Industrial Electrical Cables",
+      "imageUrl": "https://picsum.photos/seed/electric/600/400",
+      "imageHint": "electrical wire"
+    }
+  ]
 }
