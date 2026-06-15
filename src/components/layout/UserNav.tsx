@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, LogOut, Settings, LayoutDashboard } from "lucide-react";
+import { User, LogOut, Settings, LayoutDashboard, ShieldAlert } from "lucide-react";
 import { useLanguageContext } from '@/components/LanguageProvider';
 
 export function UserNav() {
@@ -37,6 +37,7 @@ export function UserNav() {
   };
 
   const getDashboardPath = () => {
+    if (profile?.role === 'admin') return '/admin';
     if (profile?.role === 'supplier') return '/dashboard';
     if (profile?.role === 'contractor') return '/contractor-dashboard';
     if (profile?.role === 'customer') return '/customer-dashboard';
@@ -46,6 +47,7 @@ export function UserNav() {
   if (!user) return null;
 
   const initials = user.email?.substring(0, 2).toUpperCase() || 'U';
+  const isAdmin = profile?.role === 'admin';
 
   return (
     <DropdownMenu>
@@ -71,6 +73,14 @@ export function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        
+        {isAdmin && (
+          <DropdownMenuItem onClick={() => router.push('/admin')} className="text-primary font-bold">
+            <ShieldAlert className={`${isAr ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+            <span>{isAr ? 'لوحة الإدارة' : 'Admin Panel'}</span>
+          </DropdownMenuItem>
+        )}
+
         <DropdownMenuItem onClick={() => router.push(getDashboardPath())}>
           <LayoutDashboard className={`${isAr ? 'ml-2' : 'mr-2'} h-4 w-4`} />
           <span>{isAr ? 'لوحة التحكم' : 'Dashboard'}</span>
