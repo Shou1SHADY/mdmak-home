@@ -52,12 +52,18 @@ export default function RegisterPage() {
       await signInWithPopup(auth, provider);
       router.push('/onboarding');
     } catch (error: any) {
-      if (error.code !== 'auth/popup-closed-by-user') {
-        const message = error instanceof FirebaseError ? error.message : "فشل التسجيل عبر جوجل";
+      if (error instanceof FirebaseError && error.code !== 'auth/popup-closed-by-user') {
+        const message = error.message || "فشل التسجيل عبر جوجل";
         toast({
           variant: "destructive",
           title: "خطأ في التسجيل",
           description: message,
+        });
+      } else if (!(error instanceof FirebaseError)) {
+        toast({
+          variant: "destructive",
+          title: "خطأ في التسجيل",
+          description: "حدث خطأ غير متوقع",
         });
       }
     } finally {
