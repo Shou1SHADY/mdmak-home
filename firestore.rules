@@ -2,29 +2,46 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Helper function to check if the user is an admin
+    function isAdmin() {
+      return request.auth != null && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
     match /users/{userId} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      
+      // Users can only create their profile with a non-admin role
+      allow create: if request.auth != null && request.auth.uid == userId 
+        && request.resource.data.role in ['customer', 'supplier', 'contractor'];
+      
+      // Users can update their profile but CANNOT change their role once set.
+      // Admins have full power to manage roles.
+      allow update: if request.auth != null && (
+        (request.auth.uid == userId && request.resource.data.role == resource.data.role)
+        || isAdmin()
+      );
+      
+      allow delete: if isAdmin();
     }
     
     match /contractors/{contractorId} {
       allow read: if true;
-      allow write: if request.auth != null && (request.auth.uid == contractorId || 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+      allow write: if request.auth != null && (request.auth.uid == contractorId || isAdmin());
     }
 
     match /products/{productId} {
       allow read: if true;
       allow write: if request.auth != null && (
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'supplier' ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'supplier' || isAdmin()
       );
     }
 
     match /rfqs/{rfqId} {
       allow read: if request.auth != null;
       allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && resource.data.customerId == request.auth.uid;
+      allow update, delete: if request.auth != null && (resource.data.customerId == request.auth.uid || isAdmin());
 
       match /quotations/{quotationId} {
         allow read: if request.auth != null;
@@ -34,13 +51,14 @@ service cloud.firestore {
         );
         allow update: if request.auth != null && (
           resource.data.supplierId == request.auth.uid || 
-          get(/databases/$(database)/documents/rfqs/$(rfqId)).data.customerId == request.auth.uid
+          get(/databases/$(database)/documents/rfqs/$(rfqId)).data.customerId == request.auth.uid ||
+          isAdmin()
         );
       }
     }
 
     match /orders/{orderId} {
-      allow read: if request.auth != null && (resource.data.customerId == request.auth.uid || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+      allow read: if request.auth != null && (resource.data.customerId == request.auth.uid || isAdmin());
       allow create: if request.auth != null;
     }
     

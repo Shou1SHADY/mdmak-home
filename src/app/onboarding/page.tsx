@@ -13,7 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { User, Store, Construction, Check, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-type Role = 'customer' | 'supplier' | 'contractor';
+// Restricted Role type for public onboarding
+type PublicRole = 'customer' | 'supplier' | 'contractor';
 
 export default function OnboardingPage() {
   const { user, loading: authLoading } = useUser();
@@ -24,7 +25,7 @@ export default function OnboardingPage() {
   const userDocRef = user ? doc(db, 'users', user.uid) : null;
   const { data: profile, loading: profileLoading } = useDoc(userDocRef);
 
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [selectedRole, setSelectedRole] = useState<PublicRole | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -39,6 +40,8 @@ export default function OnboardingPage() {
     if (!selectedRole || !user) return;
     setSaving(true);
     try {
+      // Create or update user profile. 
+      // Security rules will prevent setting 'admin' role from here.
       await setDoc(doc(db, 'users', user.uid), {
         uid: user.uid,
         email: user.email,
@@ -110,10 +113,11 @@ export default function OnboardingPage() {
               key={role.id}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              className="relative"
             >
               <Card 
                 className={`h-full cursor-pointer transition-all border-2 ${selectedRole === role.id ? 'border-primary ring-4 ring-primary/10' : 'border-transparent'}`}
-                onClick={() => setSelectedRole(role.id as Role)}
+                onClick={() => setSelectedRole(role.id as PublicRole)}
               >
                 <CardHeader className="flex flex-col items-center gap-4 text-center">
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${role.color}`}>

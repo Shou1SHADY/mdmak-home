@@ -3,7 +3,7 @@
   "entities": {
     "UserProfile": {
       "title": "User Profile",
-      "description": "Extended user information including role and onboarding status.",
+      "description": "Extended user information including role and onboarding status. Note: 'admin' role can only be assigned manually via the database.",
       "type": "object",
       "properties": {
         "uid": { "type": "string" },
@@ -128,7 +128,7 @@
   "firestore": {
     "/users/{userId}": {
       "schema": "#/entities/UserProfile",
-      "description": "User profiles stored by their authentication UID."
+      "description": "User profiles stored by their authentication UID. Roles are immutable for owners and 'admin' is protected."
     },
     "/contractors/{contractorId}": {
       "schema": "#/entities/ContractorProfile",
