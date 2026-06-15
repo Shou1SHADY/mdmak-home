@@ -1,4 +1,3 @@
-
 export type CategorySlug = 
   | 'cement' 
   | 'steel' 
@@ -29,6 +28,19 @@ export interface Product {
   stock: number;
   specifications?: Record<string, string>;
   createdAt?: any;
+}
+
+export interface SupplierOffer {
+  id: string;
+  supplierName: string;
+  rating: number;
+  price: number;
+  deliveryDays: number;
+  warranty: string;
+  stockStatus: 'in_stock' | 'low_stock' | 'out_of_stock';
+  availability: number; // percentage
+  location: string;
+  verified: boolean;
 }
 
 export interface MarketplaceFilters {
